@@ -42,6 +42,7 @@ import org.apache.calcite.plan.RelTraitDef;
 import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.RelVisitor;
+import org.apache.calcite.rel.RelWriter;
 import org.apache.calcite.rel.convert.Converter;
 import org.apache.calcite.rel.convert.ConverterRule;
 import org.apache.calcite.rel.externalize.RelWriterImpl;
@@ -1980,6 +1981,20 @@ public class VolcanoPlanner extends AbstractRelOptPlanner {
    * or by sql-to-rel converter.
    */
   private static class UnknownProvenance extends Provenance {
+  }
+
+  public static String explainRelNode(
+          final RelNode rel,
+          SqlExplainLevel detailLevel) {
+    if (rel == null) {
+      return null;
+    }
+    final StringWriter sw = new StringWriter();
+    final RelWriter planWriter =
+            new RelWriterImpl(
+                    new PrintWriter(sw), detailLevel, false);
+    rel.explain(planWriter);
+    return sw.toString();
   }
 
   /**
