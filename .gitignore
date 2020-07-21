@@ -34,4 +34,11 @@ nb-configuration.xml
 
 .mvn/wrapper/maven-wrapper.jar
 
+# build dirs
+*/build
+build
+buildSrc
+
+# gradle
+*gradle*
 # End .gitignore
