@@ -42,6 +42,7 @@ import org.apache.calcite.plan.RelTraitDef;
 import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.RelVisitor;
+import org.apache.calcite.rel.RelWriter;
 import org.apache.calcite.rel.convert.Converter;
 import org.apache.calcite.rel.convert.ConverterRule;
 import org.apache.calcite.rel.externalize.RelWriterImpl;
@@ -285,6 +286,17 @@ public class VolcanoPlanner extends AbstractRelOptPlanner {
   // implement RelOptPlanner
   public boolean isRegistered(RelNode rel) {
     return mapRel2Subset.get(rel) != null;
+  }
+
+  private void showClassOperands() {
+    for (Class<? extends RelNode> clzz : classOperands.keySet()) {
+      System.out.printf("key : %s %n", clzz);
+      System.out.print("values : ");
+      for (RelOptRuleOperand operand : classOperands.get(clzz)) {
+        System.out.print(operand.getRule().toString() + "; ");
+      }
+      System.out.println();
+    }
   }
 
   public void setRoot(RelNode rel) {
@@ -1966,6 +1978,20 @@ public class VolcanoPlanner extends AbstractRelOptPlanner {
               nodeInputs);
       volcanoPlanner.ruleQueue.addMatch(match);
     }
+  }
+
+  public static String explainRelNode(
+          final RelNode rel,
+          SqlExplainLevel detailLevel) {
+    if (rel == null) {
+      return null;
+    }
+    final StringWriter sw = new StringWriter();
+    final RelWriter planWriter =
+            new RelWriterImpl(
+                    new PrintWriter(sw), detailLevel, false);
+    rel.explain(planWriter);
+    return sw.toString();
   }
 
   /**

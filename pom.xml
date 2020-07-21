@@ -630,47 +630,47 @@ limitations under the License.
 
   <build>
     <plugins>
-      <plugin>
-        <groupId>de.thetaphi</groupId>
-        <artifactId>forbiddenapis</artifactId>
-        <configuration>
-          <!-- if the used Java version is too new, don't fail, just do nothing: -->
-          <failOnUnsupportedJava>false</failOnUnsupportedJava>
-          <bundledSignatures>
-            <!--
-              This will automatically choose the right
-              signatures based on 'maven.compiler.target':
-            -->
-            <bundledSignature>jdk-unsafe</bundledSignature>
-            <bundledSignature>jdk-deprecated</bundledSignature>
-            <!-- disallow undocumented classes like sun.misc.Unsafe: -->
-            <bundledSignature>jdk-non-portable</bundledSignature>
-          </bundledSignatures>
-          <signaturesFiles>
-            <signaturesFile>${top.dir}/src/main/config/forbidden-apis/signatures.txt</signaturesFile>
-          </signaturesFiles>
-          <excludes>
-            <exclude>**/ParseException.class</exclude>
-            <exclude>**/SimpleCharStream.class</exclude>
-            <exclude>**/*TokenManager.class</exclude>
-            <exclude>**/TokenMgrError.class</exclude>
-            <exclude>**/org/apache/calcite/adapter/os/Processes$ProcessFactory.class</exclude>
-            <exclude>**/org/apache/calcite/adapter/os/OsAdapterTest.class</exclude>
-            <exclude>**/org/apache/calcite/runtime/Resources$Inst.class</exclude>
-            <exclude>**/org/apache/calcite/test/concurrent/ConcurrentTestCommandScript.class</exclude>
-            <exclude>**/org/apache/calcite/test/concurrent/ConcurrentTestCommandScript$ShellCommand.class</exclude>
-            <exclude>**/org/apache/calcite/util/Unsafe.class</exclude>
-          </excludes>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>check</goal>
-              <goal>testCheck</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
+<!--      <plugin>-->
+<!--        <groupId>de.thetaphi</groupId>-->
+<!--        <artifactId>forbiddenapis</artifactId>-->
+<!--        <configuration>-->
+<!--          &lt;!&ndash; if the used Java version is too new, don't fail, just do nothing: &ndash;&gt;-->
+<!--          <failOnUnsupportedJava>false</failOnUnsupportedJava>-->
+<!--          <bundledSignatures>-->
+<!--            &lt;!&ndash;-->
+<!--              This will automatically choose the right-->
+<!--              signatures based on 'maven.compiler.target':-->
+<!--            &ndash;&gt;-->
+<!--            <bundledSignature>jdk-unsafe</bundledSignature>-->
+<!--            <bundledSignature>jdk-deprecated</bundledSignature>-->
+<!--            &lt;!&ndash; disallow undocumented classes like sun.misc.Unsafe: &ndash;&gt;-->
+<!--            <bundledSignature>jdk-non-portable</bundledSignature>-->
+<!--          </bundledSignatures>-->
+<!--          <signaturesFiles>-->
+<!--            <signaturesFile>${top.dir}/src/main/config/forbidden-apis/signatures.txt</signaturesFile>-->
+<!--          </signaturesFiles>-->
+<!--          <excludes>-->
+<!--            <exclude>**/ParseException.class</exclude>-->
+<!--            <exclude>**/SimpleCharStream.class</exclude>-->
+<!--            <exclude>**/*TokenManager.class</exclude>-->
+<!--            <exclude>**/TokenMgrError.class</exclude>-->
+<!--            <exclude>**/org/apache/calcite/adapter/os/Processes$ProcessFactory.class</exclude>-->
+<!--            <exclude>**/org/apache/calcite/adapter/os/OsAdapterTest.class</exclude>-->
+<!--            <exclude>**/org/apache/calcite/runtime/Resources$Inst.class</exclude>-->
+<!--            <exclude>**/org/apache/calcite/test/concurrent/ConcurrentTestCommandScript.class</exclude>-->
+<!--            <exclude>**/org/apache/calcite/test/concurrent/ConcurrentTestCommandScript$ShellCommand.class</exclude>-->
+<!--            <exclude>**/org/apache/calcite/util/Unsafe.class</exclude>-->
+<!--          </excludes>-->
+<!--        </configuration>-->
+<!--        <executions>-->
+<!--          <execution>-->
+<!--            <goals>-->
+<!--              <goal>check</goal>-->
+<!--              <goal>testCheck</goal>-->
+<!--            </goals>-->
+<!--          </execution>-->
+<!--        </executions>-->
+<!--      </plugin>-->
       <plugin>
         <groupId>org.apache.rat</groupId>
         <artifactId>apache-rat-plugin</artifactId>
