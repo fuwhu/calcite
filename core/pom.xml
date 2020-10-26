@@ -376,38 +376,38 @@ limitations under the License.
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>${maven-dependency-plugin.version}</version>
-        <!-- configurations do not cascade, so all of the definition from
-             ../pom.xml:build:plugin-management:plugins:plugin must be repeated in child poms -->
-        <executions>
-          <execution>
-            <id>analyze</id>
-            <goals>
-              <goal>analyze-only</goal>
-            </goals>
-            <configuration>
-              <failOnWarning>true</failOnWarning>
-              <!-- ignore "unused but declared" warnings -->
-              <ignoredUnusedDeclaredDependencies>
-                <ignoredUnusedDeclaredDependency>com.h2database:h2</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>com.oracle:ojdbc6</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>mysql:mysql-connector-java</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>net.hydromatic:scott-data-hsqldb</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>net.hydromatic:foodmart-data-hsqldb</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>org.postgresql:postgresql</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>org.slf4j:slf4j-api</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>org.slf4j:slf4j-log4j12</ignoredUnusedDeclaredDependency>
-              </ignoredUnusedDeclaredDependencies>
-              <ignoredUsedUndeclaredDependencies>
-                <ignoredUsedUndeclaredDependency>org.eclipse.jetty:jetty-server</ignoredUsedUndeclaredDependency>
-              </ignoredUsedUndeclaredDependencies>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+<!--      <plugin>-->
+<!--        <groupId>org.apache.maven.plugins</groupId>-->
+<!--        <artifactId>maven-dependency-plugin</artifactId>-->
+<!--        <version>${maven-dependency-plugin.version}</version>-->
+<!--        &lt;!&ndash; configurations do not cascade, so all of the definition from-->
+<!--             ../pom.xml:build:plugin-management:plugins:plugin must be repeated in child poms &ndash;&gt;-->
+<!--        <executions>-->
+<!--          <execution>-->
+<!--            <id>analyze</id>-->
+<!--            <goals>-->
+<!--              <goal>analyze-only</goal>-->
+<!--            </goals>-->
+<!--            <configuration>-->
+<!--              <failOnWarning>true</failOnWarning>-->
+<!--              &lt;!&ndash; ignore "unused but declared" warnings &ndash;&gt;-->
+<!--              <ignoredUnusedDeclaredDependencies>-->
+<!--                <ignoredUnusedDeclaredDependency>com.h2database:h2</ignoredUnusedDeclaredDependency>-->
+<!--                <ignoredUnusedDeclaredDependency>com.oracle:ojdbc6</ignoredUnusedDeclaredDependency>-->
+<!--                <ignoredUnusedDeclaredDependency>mysql:mysql-connector-java</ignoredUnusedDeclaredDependency>-->
+<!--                <ignoredUnusedDeclaredDependency>net.hydromatic:scott-data-hsqldb</ignoredUnusedDeclaredDependency>-->
+<!--                <ignoredUnusedDeclaredDependency>net.hydromatic:foodmart-data-hsqldb</ignoredUnusedDeclaredDependency>-->
+<!--                <ignoredUnusedDeclaredDependency>org.postgresql:postgresql</ignoredUnusedDeclaredDependency>-->
+<!--                <ignoredUnusedDeclaredDependency>org.slf4j:slf4j-api</ignoredUnusedDeclaredDependency>-->
+<!--                <ignoredUnusedDeclaredDependency>org.slf4j:slf4j-log4j12</ignoredUnusedDeclaredDependency>-->
+<!--              </ignoredUnusedDeclaredDependencies>-->
+<!--              <ignoredUsedUndeclaredDependencies>-->
+<!--                <ignoredUsedUndeclaredDependency>org.eclipse.jetty:jetty-server</ignoredUsedUndeclaredDependency>-->
+<!--              </ignoredUsedUndeclaredDependencies>-->
+<!--            </configuration>-->
+<!--          </execution>-->
+<!--        </executions>-->
+<!--      </plugin>-->
     </plugins>
 
     <resources>

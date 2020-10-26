@@ -25,6 +25,7 @@ import org.apache.calcite.plan.RelOptPredicateList;
 import org.apache.calcite.plan.RelOptSchema;
 import org.apache.calcite.plan.RelOptTable;
 import org.apache.calcite.plan.RelOptUtil;
+import org.apache.calcite.plan.volcano.VolcanoPlanner;
 import org.apache.calcite.prepare.RelOptTableImpl;
 import org.apache.calcite.rel.RelCollation;
 import org.apache.calcite.rel.RelCollations;
@@ -75,6 +76,7 @@ import org.apache.calcite.runtime.Hook;
 import org.apache.calcite.schema.TransientTable;
 import org.apache.calcite.schema.impl.ListTransientTable;
 import org.apache.calcite.sql.SqlAggFunction;
+import org.apache.calcite.sql.SqlExplainLevel;
 import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.SqlOperator;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
@@ -297,7 +299,11 @@ public class RelBuilder {
    * you need to use previously built expressions as inputs, call
    * {@link #build()} to pop those inputs. */
   public RelBuilder push(RelNode node) {
-    stack.push(new Frame(node));
+    Frame newFrame = new Frame(node);
+    System.out.println("RelBuilder.push : pushing new frame with the rel node : " +
+            VolcanoPlanner.explainRelNode(newFrame.rel, SqlExplainLevel.ALL_ATTRIBUTES)
+    );
+    stack.push(newFrame);
     return this;
   }
 
@@ -1208,16 +1214,27 @@ public class RelBuilder {
    * If the result is TRUE no filter is created. */
   public RelBuilder filter(Iterable<CorrelationId> variablesSet,
       Iterable<? extends RexNode> predicates) {
+    System.out.println("RelBuilder.filter : before simplification, the predicates is " + predicates);
     final RexNode simplifiedPredicates =
         simplifier.simplifyFilterPredicates(predicates);
     if (simplifiedPredicates == null) {
+      System.out.println("RelBuilder.filter : simplifiedPredicates is null");
       return empty();
     }
+    System.out.println("RelBuilder.filter : simplifiedPredicates is " +
+            simplifiedPredicates + ", and variablesSet is " + variablesSet.toString()
+    );
 
     if (!simplifiedPredicates.isAlwaysTrue()) {
       final Frame frame = stack.pop();
+      System.out.println("RelBuilder.filter : the frame rel explanation popped form stack is " +
+              VolcanoPlanner.explainRelNode(frame.rel, SqlExplainLevel.ALL_ATTRIBUTES)
+      );
       final RelNode filter = filterFactory.createFilter(frame.rel,
           simplifiedPredicates, ImmutableSet.copyOf(variablesSet));
+      System.out.println("RelBuilder.filter : pushing filter into stack, the filter rel is  " +
+              VolcanoPlanner.explainRelNode(filter, SqlExplainLevel.ALL_ATTRIBUTES)
+      );
       stack.push(new Frame(filter, frame.fields));
     }
     return this;

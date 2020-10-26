@@ -243,7 +243,9 @@ public class RexSimplify {
    * Verify adds an overhead that is only acceptable for a top-level call.
    */
   RexNode simplify(RexNode e, RexUnknownAs unknownAs) {
+    System.out.println("RexSimplify.simplify : rex node e is " + e + ", and its sql type is " + e.getType().getSqlTypeName());
     if (strong.isNull(e)) {
+      System.out.println("RexSimplify.simplify : strong.isNull(e) is true, ie. treated as UNKNOWN");
       // Only boolean NULL (aka UNKNOWN) can be converted to FALSE. Even in
       // unknownAs=FALSE mode, we must not convert a NULL integer (say) to FALSE
       if (e.getType().getSqlTypeName() == SqlTypeName.BOOLEAN) {
@@ -255,6 +257,7 @@ public class RexSimplify {
       }
       return rexBuilder.makeNullLiteral(e.getType());
     }
+    System.out.println("RexSimplify.simplify : strong.isNull(e) is not true, e.getKind() is " + e.getKind().name());
     switch (e.getKind()) {
     case AND:
       return simplifyAnd((RexCall) e, unknownAs);
@@ -625,6 +628,8 @@ public class RexSimplify {
   private RexNode simplifyIs(RexCall call, RexUnknownAs unknownAs) {
     final SqlKind kind = call.getKind();
     final RexNode a = call.getOperands().get(0);
+    System.out.println("RexSimplify.simplifyIs : call is " + call.toString() +
+            ", and its kind is " + kind.name() + ", and first operand is " + a.toString());
 
     // UnknownAs.FALSE corresponds to x IS TRUE evaluation
     // UnknownAs.TRUE to x IS NOT FALSE
@@ -646,21 +651,31 @@ public class RexSimplify {
       return simplify(rexBuilder.makeCall(SqlStdOperatorTable.NOT, a), unknownAs);
     }
     final RexNode pred = simplifyIsPredicate(kind, a);
+    System.out.println("RexSimplify.simplifyIs : the result of simplifyIsPredicate on kind " +
+            kind.name() + " and operand " + a.toString() + " is " + pred
+    );
     if (pred != null) {
       return pred;
     }
 
     final RexNode simplified = simplifyIs2(kind, a, unknownAs);
+    System.out.println("RexSimplify.simplifyIs : the result of simplifyIs2 on kind " +
+            kind.name() + " and operand " + a.toString() + " and unknowAs " + unknownAs.toString() + " is " + simplified
+    );
     if (simplified != null) {
       return simplified;
     }
+    System.out.println("RexSimplify.simplifyIs : returning original call " + call.toString());
     return call;
   }
 
   private RexNode simplifyIsPredicate(SqlKind kind, RexNode a) {
     if (!RexUtil.isReferenceOrAccess(a, true)) {
+      System.out.println("RexSimplify.simplifyIsPredicate : is not Reference or Access, a is " + a.toString());
       return null;
     }
+
+    System.out.println("RexSimplify.simplifyIsPredicate : predicates.pulledUpPredicates is " + predicates.pulledUpPredicates);
 
     for (RexNode p : predicates.pulledUpPredicates) {
       IsPredicate pred = IsPredicate.of(p);
@@ -680,6 +695,7 @@ public class RexSimplify {
     case IS_NULL:
       // x IS NULL ==> FALSE (if x is not nullable)
       simplified = simplifyIsNull(a);
+      System.out.println("RexSimplify.simplifyIs2 : result of simplifyIsNull(a) is " + simplified + ", a is " + a.toString());
       if (simplified != null) {
         return simplified;
       }
@@ -790,6 +806,7 @@ public class RexSimplify {
     // argument to "2", and only then we can simplify "2 IS NULL" to "FALSE".
     a = simplify(a, UNKNOWN);
     if (!a.getType().isNullable() && isSafeExpression(a)) {
+      System.out.println("RexSimplify.simplifyIsNull : returning false literal as result.");
       return rexBuilder.makeLiteral(false);
     }
     if (RexUtil.isNull(a)) {

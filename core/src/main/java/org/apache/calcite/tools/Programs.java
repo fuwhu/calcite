@@ -31,6 +31,7 @@ import org.apache.calcite.plan.hep.HepMatchOrder;
 import org.apache.calcite.plan.hep.HepPlanner;
 import org.apache.calcite.plan.hep.HepProgram;
 import org.apache.calcite.plan.hep.HepProgramBuilder;
+import org.apache.calcite.plan.volcano.VolcanoPlanner;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.core.Calc;
 import org.apache.calcite.rel.core.RelFactories;
@@ -56,6 +57,7 @@ import org.apache.calcite.rel.rules.SemiJoinRule;
 import org.apache.calcite.rel.rules.SortProjectTransposeRule;
 import org.apache.calcite.rel.rules.SubQueryRemoveRule;
 import org.apache.calcite.rel.rules.TableScanRule;
+import org.apache.calcite.sql.SqlExplainLevel;
 import org.apache.calcite.sql2rel.RelDecorrelator;
 import org.apache.calcite.sql2rel.RelFieldTrimmer;
 import org.apache.calcite.sql2rel.SqlToRelConverter;
@@ -320,8 +322,10 @@ public class Programs {
       for (RelOptLattice lattice : lattices) {
         planner.addLattice(lattice);
       }
+      System.out.println("RuleSetProgram.run : the rel node explanation before changeTraits is " + VolcanoPlanner.explainRelNode(rel, SqlExplainLevel.ALL_ATTRIBUTES));
       if (!rel.getTraitSet().equals(requiredOutputTraits)) {
         rel = planner.changeTraits(rel, requiredOutputTraits);
+        System.out.println("RuleSetProgram.run : the rel node explanation after changeTraits is " + VolcanoPlanner.explainRelNode(rel, SqlExplainLevel.ALL_ATTRIBUTES));
       }
       planner.setRoot(rel);
       return planner.findBestExp();
@@ -345,6 +349,10 @@ public class Programs {
       for (Program program : programs) {
         rel = program.run(
             planner, rel, requiredOutputTraits, materializations, lattices);
+        System.out.println("After running the program : " + program.toString() +
+                " , the rel node explanation is " +
+                VolcanoPlanner.explainRelNode(rel, SqlExplainLevel.ALL_ATTRIBUTES)
+        );
       }
       return rel;
     }

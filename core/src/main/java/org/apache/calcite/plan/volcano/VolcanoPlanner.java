@@ -42,6 +42,7 @@ import org.apache.calcite.plan.RelTraitDef;
 import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.RelVisitor;
+import org.apache.calcite.rel.RelWriter;
 import org.apache.calcite.rel.convert.Converter;
 import org.apache.calcite.rel.convert.ConverterRule;
 import org.apache.calcite.rel.externalize.RelWriterImpl;
@@ -287,6 +288,20 @@ public class VolcanoPlanner extends AbstractRelOptPlanner {
     return mapRel2Subset.get(rel) != null;
   }
 
+  public static String explainRelNode(
+          final RelNode rel,
+          SqlExplainLevel detailLevel) {
+    if (rel == null) {
+      return null;
+    }
+    final StringWriter sw = new StringWriter();
+    final RelWriter planWriter =
+            new RelWriterImpl(
+                    new PrintWriter(sw), detailLevel, false);
+    rel.explain(planWriter);
+    return sw.toString();
+  }
+
   public void setRoot(RelNode rel) {
     // We're registered all the rules, and therefore RelNode classes,
     // we're interested in, and have not yet started calling metadata providers.
@@ -299,6 +314,8 @@ public class VolcanoPlanner extends AbstractRelOptPlanner {
     }
 
     // Making a node the root changes its importance.
+    System.out.println("original rel node is : " + explainRelNode(rel, SqlExplainLevel.ALL_ATTRIBUTES));
+    System.out.println("root rel node is : " + explainRelNode(this.root, SqlExplainLevel.ALL_ATTRIBUTES));
     this.ruleQueue.recompute(this.root);
     ensureRootConverters();
   }

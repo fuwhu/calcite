@@ -19,6 +19,7 @@ package org.apache.calcite.sql2rel;
 import org.apache.calcite.linq4j.Ord;
 import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelOptUtil;
+import org.apache.calcite.plan.volcano.VolcanoPlanner;
 import org.apache.calcite.rel.RelCollation;
 import org.apache.calcite.rel.RelCollations;
 import org.apache.calcite.rel.RelFieldCollation;
@@ -70,11 +71,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Transformer that walks over a tree of relational expressions, replacing each
@@ -154,11 +151,14 @@ public class RelFieldTrimmer implements ReflectiveVisitor {
    * @return Trimmed relational expression
    */
   public RelNode trim(RelNode root) {
+    System.out.println("RelFieldTrimmer.trim : before trim, the rel node explanation is " + VolcanoPlanner.explainRelNode(root, SqlExplainLevel.ALL_ATTRIBUTES));
     final int fieldCount = root.getRowType().getFieldCount();
     final ImmutableBitSet fieldsUsed = ImmutableBitSet.range(fieldCount);
     final Set<RelDataTypeField> extraFields = Collections.emptySet();
+    System.out.println("field count is " + fieldCount + ", fieldsUsed is " + fieldsUsed + ", extraFields is " + extraFields);
     final TrimResult trimResult =
         dispatchTrimFields(root, fieldsUsed, extraFields);
+    System.out.println("RelFieldTrimmer.trim : after trim, the rel node explanation is " + VolcanoPlanner.explainRelNode(trimResult.left, SqlExplainLevel.ALL_ATTRIBUTES));
     if (!trimResult.right.isIdentity()) {
       throw new IllegalArgumentException();
     }
@@ -268,10 +268,21 @@ public class RelFieldTrimmer implements ReflectiveVisitor {
       RelNode rel,
       ImmutableBitSet fieldsUsed,
       Set<RelDataTypeField> extraFields) {
+    System.out.println("Before invoking trimFields, the rel explanation is " + VolcanoPlanner.explainRelNode(rel, SqlExplainLevel.ALL_ATTRIBUTES));
     final TrimResult trimResult =
         trimFieldsDispatcher.invoke(rel, fieldsUsed, extraFields);
     final RelNode newRel = trimResult.left;
     final Mapping mapping = trimResult.right;
+    String mappingStr = "";
+    Iterator<IntPair> iter = mapping.iterator();
+    while (iter.hasNext()) {
+      IntPair intPair = iter.next();
+      mappingStr += ("(" + intPair.source + "," + intPair.target + ")\n");
+    }
+    System.out.println("After invoking trimFields, the newRel explanation is " +
+            VolcanoPlanner.explainRelNode(newRel, SqlExplainLevel.ALL_ATTRIBUTES) +
+            ", and the mapping is " + mappingStr
+    );
     final int fieldCount = rel.getRowType().getFieldCount();
     assert mapping.getSourceCount() == fieldCount
         : "source: " + mapping.getSourceCount() + " != " + fieldCount;
@@ -453,6 +464,12 @@ public class RelFieldTrimmer implements ReflectiveVisitor {
     final RexNode conditionExpr = filter.getCondition();
     final RelNode input = filter.getInput();
 
+    System.out.println("RelFieldTrimmer.trimFields : before trimming Filter, the filter is " +
+            VolcanoPlanner.explainRelNode(filter, SqlExplainLevel.ALL_ATTRIBUTES) +
+            ", fieldsUsed is " + fieldsUsed + ", extraFields is " + extraFields +
+            ", input explanation for filter is " + VolcanoPlanner.explainRelNode(input, SqlExplainLevel.ALL_ATTRIBUTES)
+    );
+
     // We use the fields used by the consumer, plus any fields used in the
     // filter.
     final Set<RelDataTypeField> inputExtraFields =
@@ -468,6 +485,10 @@ public class RelFieldTrimmer implements ReflectiveVisitor {
         trimChild(filter, input, inputFieldsUsed, inputExtraFields);
     RelNode newInput = trimResult.left;
     final Mapping inputMapping = trimResult.right;
+    System.out.println("RelFieldTrimmer.trimFields : inputFieldsUsed is " +
+                    inputFieldsUsed.toString() + ", newInput explanation is " +
+                    VolcanoPlanner.explainRelNode(newInput, SqlExplainLevel.ALL_ATTRIBUTES)
+    );
 
     // If the input is unchanged, and we need to project all columns,
     // there's nothing we can do.
@@ -485,11 +506,18 @@ public class RelFieldTrimmer implements ReflectiveVisitor {
     // Build new filter with trimmed input and condition.
     relBuilder.push(newInput)
         .filter(filter.getVariablesSet(), newConditionExpr);
+    System.out.println("RelFieldTrimmer.trimFields : building new rel node, filter variable set is " +
+            filter.getVariablesSet() + ", new input explanation  is " +
+            VolcanoPlanner.explainRelNode(newInput, SqlExplainLevel.ALL_ATTRIBUTES) +
+            ", new condition is " + newConditionExpr.toString()
+    );
 
     // The result has the same mapping as the input gave us. Sometimes we
     // return fields that the consumer didn't ask for, because the filter
     // needs them for its condition.
-    return result(relBuilder.build(), inputMapping);
+    RelNode newRelNode = relBuilder.build();
+    System.out.println("RelFieldTrimmer.trimFields : newRelNode explanation is " + VolcanoPlanner.explainRelNode(newRelNode, SqlExplainLevel.ALL_ATTRIBUTES));
+    return result(newRelNode, inputMapping);
   }
 
   /**
